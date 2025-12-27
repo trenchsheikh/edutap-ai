@@ -16,8 +16,9 @@ const META_THEME_COLORS = {
 };
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn',
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'EduTap - AI Recruitment for Schools',
+  description:
+    'AI-powered recruitment platform for HR teams at Schools in Qatar'
 };
 
 export const viewport: Viewport = {
