@@ -5,6 +5,8 @@ import { useTheme } from 'next-themes';
 import React from 'react';
 import { ActiveThemeProvider } from '../active-theme';
 
+import DirectionProvider from '@/components/providers/direction-provider';
+
 export default function Providers({
   activeThemeValue,
   children
@@ -17,15 +19,17 @@ export default function Providers({
 
   return (
     <>
-      <ActiveThemeProvider initialTheme={activeThemeValue}>
-        <ClerkProvider
-          appearance={{
-            baseTheme: resolvedTheme === 'dark' ? dark : undefined
-          }}
-        >
-          {children}
-        </ClerkProvider>
-      </ActiveThemeProvider>
+      <DirectionProvider>
+        <ActiveThemeProvider initialTheme={activeThemeValue}>
+          <ClerkProvider
+            appearance={{
+              baseTheme: resolvedTheme === 'dark' ? dark : undefined
+            }}
+          >
+            {children}
+          </ClerkProvider>
+        </ActiveThemeProvider>
+      </DirectionProvider>
     </>
   );
 }

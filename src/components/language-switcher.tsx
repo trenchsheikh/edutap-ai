@@ -7,8 +7,11 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { IconWorld } from '@tabler/icons-react';
+import { useAppStore } from '@/lib/store';
 
 export function LanguageSwitcher() {
+  const { language, setLanguage } = useAppStore();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -21,9 +24,13 @@ export function LanguageSwitcher() {
           <span className='sr-only'>Toggle language</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end'>
-        <DropdownMenuItem>English</DropdownMenuItem>
-        <DropdownMenuItem>Arabic (العربية)</DropdownMenuItem>
+      <DropdownMenuContent align={language === 'ar' ? 'start' : 'end'}>
+        <DropdownMenuItem onClick={() => setLanguage('en')}>
+          English
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('ar')}>
+          Arabic (العربية)
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

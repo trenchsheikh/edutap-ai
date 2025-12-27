@@ -56,6 +56,8 @@ import { FileUploader } from '@/components/file-uploader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 
+import { translations } from '@/lib/translations';
+
 export default function JobDetailPage({
   params
 }: {
@@ -69,9 +71,13 @@ export default function JobDetailPage({
     scoreCandidates,
     updateCandidateStatus,
     addCandidate,
-    assignCandidatesToJob
+    assignCandidatesToJob,
+    language
   } = useAppStore();
 
+  const t = translations[language];
+
+  // ... (State hooks same as before)
   const job = getJob(jobId);
 
   const [isScoring, setIsScoring] = useState(false);
@@ -106,6 +112,7 @@ export default function JobDetailPage({
   }, [candidates, job, filterQuery]);
 
   const handleUpload = async (uploadedFiles: File[]) => {
+    // ... (implementation same)
     const newIds: string[] = [];
     uploadedFiles.forEach((file) => {
       const id = Math.random().toString(36).substr(2, 9);
@@ -168,11 +175,11 @@ export default function JobDetailPage({
       <PageContainer>
         <div className='flex h-[50vh] flex-col items-center justify-center space-y-4'>
           <Heading
-            title='Job Not Found'
-            description='The requested job posting could not be found.'
+            title={t['job.notFound']}
+            description={t['job.notFoundDesc']}
           />
           <Button onClick={() => router.push('/dashboard/jobs')}>
-            Back to Jobs
+            {t['job.backToJobs']}
           </Button>
         </div>
       </PageContainer>
@@ -202,7 +209,6 @@ export default function JobDetailPage({
     }, 1000);
   };
 
-  // ... (Dialog Handlers for Schedule/Cancel kept same as before in logic placeholder)
   const handleScheduleCalls = (e: React.FormEvent) => {
     e.preventDefault();
     setScheduleOpen(false);
@@ -221,7 +227,7 @@ export default function JobDetailPage({
         {/* Header */}
         <div className='flex items-center gap-4'>
           <Button variant='ghost' size='icon' onClick={() => router.back()}>
-            <IconArrowLeft size={20} />
+            <IconArrowLeft className='rtl:rotate-180' size={20} />
           </Button>
           <div className='flex-1'>
             <Heading
@@ -243,28 +249,34 @@ export default function JobDetailPage({
         {/* Job Details Summary (Full Width now) */}
         <Card>
           <CardHeader>
-            <CardTitle>Job Overview</CardTitle>
+            <CardTitle>{t['job.overview']}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='mb-6 grid grid-cols-2 gap-4 md:grid-cols-4'>
               <div className='bg-muted/20 flex items-center gap-2 rounded-md p-3 text-sm'>
                 <IconBriefcase className='text-muted-foreground' size={20} />
                 <div>
-                  <p className='text-muted-foreground text-xs'>Type</p>
+                  <p className='text-muted-foreground text-xs'>
+                    {t['job.type']}
+                  </p>
                   <span className='font-medium'>{job.type}</span>
                 </div>
               </div>
               <div className='bg-muted/20 flex items-center gap-2 rounded-md p-3 text-sm'>
                 <IconMapPin className='text-muted-foreground' size={20} />
                 <div>
-                  <p className='text-muted-foreground text-xs'>Location</p>
+                  <p className='text-muted-foreground text-xs'>
+                    {t['job.location']}
+                  </p>
                   <span className='font-medium'>{job.location}</span>
                 </div>
               </div>
               <div className='bg-muted/20 flex items-center gap-2 rounded-md p-3 text-sm'>
                 <IconCalendar className='text-muted-foreground' size={20} />
                 <div>
-                  <p className='text-muted-foreground text-xs'>Posted</p>
+                  <p className='text-muted-foreground text-xs'>
+                    {t['job.posted']}
+                  </p>
                   <span className='font-medium'>
                     {format(new Date(job.createdAt), 'MMM dd, yyyy')}
                   </span>
@@ -273,15 +285,15 @@ export default function JobDetailPage({
               <div className='bg-muted/20 flex items-center gap-2 rounded-md p-3 text-sm'>
                 <IconUsers className='text-muted-foreground' size={20} />
                 <div>
-                  <p className='text-muted-foreground text-xs'>Candidates</p>
-                  <span className='font-medium'>
-                    {jobCandidates.length} Assigned
-                  </span>
+                  <p className='text-muted-foreground text-xs'>
+                    {t['job.assigned']}
+                  </p>
+                  <span className='font-medium'>{jobCandidates.length}</span>
                 </div>
               </div>
             </div>
             <div>
-              <h4 className='mb-2 font-semibold'>Description</h4>
+              <h4 className='mb-2 font-semibold'>{t['job.desc']}</h4>
               <p className='text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap'>
                 {job.description || 'No description provided.'}
               </p>
@@ -290,14 +302,13 @@ export default function JobDetailPage({
         </Card>
 
         {/* Candidates Table (Full Width) */}
+        {/* Candidates Table (Full Width) */}
         <Card className='w-full'>
           <CardHeader>
             <div className='flex flex-col justify-between gap-4 md:flex-row md:items-center'>
               <div>
-                <CardTitle>Candidates Pipeline</CardTitle>
-                <CardDescription>
-                  Manage and screen candidates for this position.
-                </CardDescription>
+                <CardTitle>{t['job.pipeline']}</CardTitle>
+                <CardDescription>{t['job.pipelineDesc']}</CardDescription>
               </div>
               <div className='flex flex-wrap gap-2'>
                 {/* Score CVs Button */}
@@ -309,7 +320,7 @@ export default function JobDetailPage({
                   <IconWand
                     className={`mr-2 h-4 w-4 ${isScoring ? 'animate-spin' : ''}`}
                   />
-                  {isScoring ? 'Analyzing...' : 'Score CVs'}
+                  {isScoring ? t['job.analyzing'] : t['job.scoreCVs']}
                 </Button>
 
                 {/* Call All Dialog */}
@@ -320,21 +331,24 @@ export default function JobDetailPage({
                       className='bg-emerald-600 text-white hover:bg-emerald-700'
                       disabled={jobCandidates.length === 0}
                     >
-                      <IconPhoneCalling className='mr-2 h-4 w-4' /> Call All
+                      <IconPhoneCalling className='mr-2 h-4 w-4' />{' '}
+                      {t['job.callAll']}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Start AI Call Campaign</DialogTitle>
+                      <DialogTitle>{t['dialog.callAll.title']}</DialogTitle>
                       <DialogDescription>
-                        Configure the call campaign for {jobCandidates.length}{' '}
-                        candidates.
+                        {t['dialog.callAll.desc'].replace(
+                          '{count}',
+                          jobCandidates.length.toString()
+                        )}
                       </DialogDescription>
                     </DialogHeader>
                     <div className='grid gap-4 py-4'>
                       <div className='grid grid-cols-2 gap-4'>
                         <div className='space-y-2'>
-                          <Label>Date</Label>
+                          <Label>{t['calls.date']}</Label>
                           <Input
                             type='date'
                             defaultValue={
@@ -348,18 +362,22 @@ export default function JobDetailPage({
                         </div>
                       </div>
                       <div className='space-y-2'>
-                        <Label>AI Agent Context</Label>
-                        <Textarea placeholder='Additional instructions for the AI agent (optional)...' />
+                        <Label>{t['dialog.agentContext']}</Label>
+                        <Textarea
+                          placeholder={t['dialog.agentContextPlaceholder']}
+                        />
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant='outline'>Cancel</Button>
+                      <Button variant='outline'>{t['common.cancel']}</Button>
                       <Button
                         onClick={handleCallAll}
                         disabled={isCalling}
                         className='bg-emerald-600 hover:bg-emerald-700'
                       >
-                        {isCalling ? 'Queueing...' : 'Confirm & Start'}
+                        {isCalling
+                          ? t['common.loading']
+                          : t['dialog.callAll.confirm']}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -373,21 +391,22 @@ export default function JobDetailPage({
                       variant='outline'
                       disabled={jobCandidates.length === 0}
                     >
-                      <IconCalendarEvent className='mr-2 h-4 w-4' /> Schedule
+                      <IconCalendarEvent className='mr-2 h-4 w-4' />{' '}
+                      {t['job.schedule']}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <form onSubmit={handleScheduleCalls}>
                       <DialogHeader>
-                        <DialogTitle>Schedule Call Campaign</DialogTitle>
+                        <DialogTitle>{t['dialog.schedule.title']}</DialogTitle>
                         <DialogDescription>
-                          Select a date and time to start the campaign.
+                          {t['dialog.schedule.desc']}
                         </DialogDescription>
                       </DialogHeader>
                       <div className='grid gap-4 py-4'>
                         <div className='grid grid-cols-2 gap-4'>
                           <div className='space-y-2'>
-                            <Label>Date</Label>
+                            <Label>{t['calls.date']}</Label>
                             <Input type='date' required />
                           </div>
                           <div className='space-y-2'>
@@ -402,9 +421,9 @@ export default function JobDetailPage({
                           variant='outline'
                           onClick={() => setScheduleOpen(false)}
                         >
-                          Cancel
+                          {t['common.cancel']}
                         </Button>
-                        <Button type='submit'>Schedule</Button>
+                        <Button type='submit'>{t['job.schedule']}</Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
@@ -418,19 +437,19 @@ export default function JobDetailPage({
                       variant='destructive'
                       disabled={jobCandidates.length === 0}
                     >
-                      <IconX className='mr-2 h-4 w-4' /> Cancel All
+                      <IconX className='mr-2 h-4 w-4' /> {t['job.cancelAll']}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <form onSubmit={handleCancelCalls}>
                       <DialogHeader>
-                        <DialogTitle>Cancel Active Campaign?</DialogTitle>
+                        <DialogTitle>{t['dialog.cancel.title']}</DialogTitle>
                         <DialogDescription>
-                          Stop all pending and scheduled calls for this job.
+                          {t['dialog.cancel.desc']}
                         </DialogDescription>
                       </DialogHeader>
                       <div className='space-y-2 py-4'>
-                        <Label>Reason for cancellation (Optional)</Label>
+                        <Label>{t['dialog.cancel.reason']}</Label>
                         <Textarea placeholder='e.g. Position filled...' />
                       </div>
                       <DialogFooter>
@@ -439,10 +458,10 @@ export default function JobDetailPage({
                           variant='outline'
                           onClick={() => setCancelOpen(false)}
                         >
-                          Back
+                          {t['common.back']}
                         </Button>
                         <Button type='submit' variant='destructive'>
-                          Stop Campaign
+                          {t['dialog.stop']}
                         </Button>
                       </DialogFooter>
                     </form>
@@ -453,24 +472,24 @@ export default function JobDetailPage({
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button size='sm'>
-                      <IconPlus className='mr-2 h-4 w-4' /> Add Candidates
+                      <IconPlus className='mr-2 h-4 w-4' />{' '}
+                      {t['job.addCandidates']}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className='max-w-3xl'>
                     <DialogHeader>
-                      <DialogTitle>Add Candidates to Pipeline</DialogTitle>
+                      <DialogTitle>{t['dialog.add.title']}</DialogTitle>
                       <DialogDescription>
-                        Upload new CVs or select existing candidates from the
-                        database.
+                        {t['dialog.add.desc']}
                       </DialogDescription>
                     </DialogHeader>
                     <Tabs defaultValue='upload' className='w-full'>
                       <TabsList className='grid w-full grid-cols-2'>
                         <TabsTrigger value='upload'>
-                          Mass Upload CVs
+                          {t['dialog.upload.tab']}
                         </TabsTrigger>
                         <TabsTrigger value='existing'>
-                          Select Existing
+                          {t['dialog.existing.tab']}
                         </TabsTrigger>
                       </TabsList>
                       <TabsContent value='upload' className='space-y-4 py-4'>
@@ -484,17 +503,16 @@ export default function JobDetailPage({
                           />
                         </div>
                         <p className='text-muted-foreground text-sm'>
-                          Uploaded files will be automatically parsed and added
-                          as new candidates to this job.
+                          {t['dialog.upload.note']}
                         </p>
                       </TabsContent>
                       <TabsContent value='existing' className='space-y-4 py-4'>
                         <div className='mb-4 flex items-center gap-2'>
                           <div className='relative flex-1'>
-                            <IconSearch className='text-muted-foreground absolute top-2.5 left-2 h-4 w-4' />
+                            <IconSearch className='text-muted-foreground absolute top-2.5 left-2 h-4 w-4 rtl:right-2 rtl:left-auto' />
                             <Input
-                              placeholder='Search unassigned candidates...'
-                              className='pl-8'
+                              placeholder={t['dialog.search.placeholder']}
+                              className='pl-8 rtl:pr-8 rtl:pl-4'
                               value={filterQuery}
                               onChange={(e) => setFilterQuery(e.target.value)}
                             />
@@ -505,10 +523,12 @@ export default function JobDetailPage({
                             <TableHeader className='bg-background sticky top-0 z-10'>
                               <TableRow>
                                 <TableHead className='w-[50px]'>
-                                  Select
+                                  {t['dialog.select']}
                                 </TableHead>
-                                <TableHead>Candidate</TableHead>
-                                <TableHead>Role</TableHead>
+                                <TableHead>
+                                  {t['job.table.candidate']}
+                                </TableHead>
+                                <TableHead>{t['job.table.role']}</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -518,7 +538,7 @@ export default function JobDetailPage({
                                     colSpan={3}
                                     className='text-muted-foreground py-8 text-center'
                                   >
-                                    No matching candidates found.
+                                    {t['dialog.noMatch']}
                                   </TableCell>
                                 </TableRow>
                               ) : (
@@ -556,13 +576,16 @@ export default function JobDetailPage({
                         </div>
                         <div className='flex items-center justify-between'>
                           <p className='text-muted-foreground text-sm'>
-                            {selectedUnassignedIds.length} candidates selected
+                            {t['dialog.selectedCount'].replace(
+                              '{count}',
+                              selectedUnassignedIds.length.toString()
+                            )}
                           </p>
                           <Button
                             onClick={handleAddExisting}
                             disabled={selectedUnassignedIds.length === 0}
                           >
-                            Add Selected
+                            {t['dialog.addSelected']}
                           </Button>
                         </div>
                       </TabsContent>
@@ -581,7 +604,7 @@ export default function JobDetailPage({
                       className='hover:bg-muted/50 cursor-pointer'
                       onClick={() => handleSort('name')}
                     >
-                      Candidate Name{' '}
+                      {t['job.table.candidate']}{' '}
                       {sortConfig.key === 'name' &&
                         (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </TableHead>
@@ -589,7 +612,7 @@ export default function JobDetailPage({
                       className='hover:bg-muted/50 cursor-pointer'
                       onClick={() => handleSort('role')}
                     >
-                      Role{' '}
+                      {t['job.table.role']}{' '}
                       {sortConfig.key === 'role' &&
                         (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </TableHead>
@@ -597,7 +620,7 @@ export default function JobDetailPage({
                       className='hover:bg-muted/50 cursor-pointer'
                       onClick={() => handleSort('matchScore')}
                     >
-                      Match Score{' '}
+                      {t['job.table.match']}{' '}
                       {sortConfig.key === 'matchScore' &&
                         (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </TableHead>
@@ -605,11 +628,11 @@ export default function JobDetailPage({
                       className='hover:bg-muted/50 cursor-pointer'
                       onClick={() => handleSort('status')}
                     >
-                      Status{' '}
+                      {t['job.table.status']}{' '}
                       {sortConfig.key === 'status' &&
                         (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t['job.table.actions']}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -619,7 +642,7 @@ export default function JobDetailPage({
                         colSpan={5}
                         className='text-muted-foreground py-8 text-center'
                       >
-                        No candidates assigned to this job yet.
+                        {t['job.noCandidates']}
                       </TableCell>
                     </TableRow>
                   ) : (

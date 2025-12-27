@@ -19,21 +19,24 @@ import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { format } from 'date-fns';
 
+import { translations } from '@/lib/translations';
+
 export default function JobsPage() {
   const router = useRouter();
-  const { jobs } = useAppStore();
+  const { jobs, language } = useAppStore();
+  const t = translations[language];
 
   return (
     <PageContainer>
       <div className='flex flex-1 flex-col space-y-4'>
         <div className='flex items-start justify-between'>
           <Heading
-            title={`Jobs (${jobs.length})`}
-            description='Manage your job postings and recruitment pipelines.'
+            title={`${t['jobs.title']} (${jobs.length})`}
+            description={t['jobs.description']}
           />
           <Link href='/dashboard/jobs/new'>
             <Button>
-              <IconPlus className='mr-2 h-4 w-4' /> Create New Job
+              <IconPlus className='mr-2 h-4 w-4' /> {t['jobs.createNew']}
             </Button>
           </Link>
         </div>
@@ -42,13 +45,13 @@ export default function JobsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Job Title</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>School</TableHead>
-              <TableHead>Candidates</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created Date</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>{t['jobs.table.title']}</TableHead>
+              <TableHead>{t['jobs.table.dept']}</TableHead>
+              <TableHead>{t['jobs.table.school']}</TableHead>
+              <TableHead>{t['jobs.table.candidates']}</TableHead>
+              <TableHead>{t['jobs.table.status']}</TableHead>
+              <TableHead>{t['jobs.table.created']}</TableHead>
+              <TableHead>{t['jobs.table.actions']}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -80,7 +83,7 @@ export default function JobsPage() {
                     size='sm'
                     onClick={() => router.push(`/dashboard/jobs/${job.id}`)}
                   >
-                    View
+                    {t['common.view']}
                   </Button>
                 </TableCell>
               </TableRow>

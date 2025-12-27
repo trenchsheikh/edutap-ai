@@ -1,8 +1,9 @@
 import { NavItem } from '@/types';
+import { TranslationKey } from '@/lib/translations';
 
-export const navItems: NavItem[] = [
+export const navItems: (NavItem & { title: TranslationKey })[] = [
   {
-    title: 'Dashboard',
+    title: 'nav.dashboard',
     url: '/dashboard/overview',
     icon: 'dashboard',
     isActive: false,
@@ -10,7 +11,7 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
-    title: 'Jobs',
+    title: 'nav.jobs',
     url: '/dashboard/jobs',
     icon: 'jobs',
     isActive: false,
@@ -18,7 +19,7 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
-    title: 'Candidates',
+    title: 'nav.candidates',
     url: '/dashboard/candidates',
     icon: 'candidates',
     isActive: false,
@@ -26,7 +27,7 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
-    title: 'AI Agents',
+    title: 'nav.agents',
     url: '/dashboard/agents',
     icon: 'agents',
     isActive: false,
@@ -34,7 +35,7 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
-    title: 'Call History',
+    title: 'nav.calclogs',
     url: '/dashboard/calls',
     icon: 'calls',
     isActive: false,
@@ -42,7 +43,7 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
-    title: 'Settings',
+    title: 'nav.settings',
     url: '/dashboard/settings',
     icon: 'settings',
     isActive: false,

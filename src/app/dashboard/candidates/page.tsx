@@ -19,9 +19,12 @@ import { Card } from '@/components/ui/card'; // Added Card import
 import { IconPhone, IconDownload, IconFileText } from '@tabler/icons-react';
 import { useAppStore } from '@/lib/store';
 
+import { translations } from '@/lib/translations';
+
 export default function CandidatesPage() {
   const [files, setFiles] = useState<File[]>([]);
-  const { candidates, addCandidate } = useAppStore();
+  const { candidates, addCandidate, language } = useAppStore();
+  const t = translations[language];
 
   const handleUpload = async (uploadedFiles: File[]) => {
     // Simulate candidate processing
@@ -47,17 +50,17 @@ export default function CandidatesPage() {
       <div className='flex flex-1 flex-col space-y-4'>
         <div className='flex items-start justify-between'>
           <Heading
-            title={`Candidates (${candidates.length})`}
-            description='Manage candidate profiles and AI screening status.'
+            title={`${t['candidates.title']} (${candidates.length})`}
+            description={t['candidates.desc']}
           />
         </div>
         <Separator />
 
         <div className='grid gap-4 md:grid-cols-4'>
           <div className='bg-muted/20 sticky top-4 h-fit rounded-lg border p-4 md:col-span-1'>
-            <h3 className='mb-2 font-semibold'>Upload CVs</h3>
+            <h3 className='mb-2 font-semibold'>{t['candidates.upload']}</h3>
             <p className='text-muted-foreground mb-4 text-sm'>
-              Upload PDF or DOCX resumes to automatically add candidates.
+              {t['candidates.uploadDesc']}
             </p>
             <FileUploader
               maxFiles={10}
@@ -78,12 +81,12 @@ export default function CandidatesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Candidate Name</TableHead>
-                    <TableHead>Target Role</TableHead>
-                    <TableHead>Experience</TableHead>
-                    <TableHead>Desired Salary</TableHead>
-                    <TableHead>Call Outcome</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t['candidates.table.name']}</TableHead>
+                    <TableHead>{t['candidates.table.target']}</TableHead>
+                    <TableHead>{t['candidates.table.exp']}</TableHead>
+                    <TableHead>{t['candidates.table.salary']}</TableHead>
+                    <TableHead>{t['candidates.table.outcome']}</TableHead>
+                    <TableHead>{t['candidates.table.actions']}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

@@ -4,6 +4,8 @@ import { Candidate, Job, initialJobs, initialCandidates } from './mock-data';
 interface AppState {
   jobs: Job[];
   candidates: Candidate[];
+  language: 'en' | 'ar';
+  setLanguage: (lang: 'en' | 'ar') => void;
   addJob: (job: Job) => void;
   addCandidate: (candidate: Candidate) => void;
   assignCandidatesToJob: (jobId: string, candidateIds: string[]) => void;
@@ -18,6 +20,8 @@ interface AppState {
 export const useAppStore = create<AppState>((set, get) => ({
   jobs: initialJobs,
   candidates: initialCandidates,
+  language: 'en',
+  setLanguage: (lang) => set({ language: lang }),
   addJob: (job) => set((state) => ({ jobs: [job, ...state.jobs] })),
   addCandidate: (candidate) =>
     set((state) => ({ candidates: [candidate, ...state.candidates] })),
