@@ -39,6 +39,7 @@ export const translations = {
     'common.loading': 'Loading...',
     'common.success': 'Success',
     'common.error': 'Error',
+    'common.actions': 'Actions',
 
     // Jobs List
     'jobs.title': 'Job Postings',
@@ -138,6 +139,16 @@ export const translations = {
     'agents.avgDuration': 'Avg Duration',
     'agents.successRate': 'Success Rate',
     'agents.total': 'Total Calls',
+    'agents.form.name': 'Agent Name',
+    'agents.form.type': 'Agent Purpose',
+    'agents.form.language': 'Primary Language',
+    'agents.form.voice': 'Voice Selection',
+    'agents.form.personality': 'Agent Personality/Tone',
+    'agents.form.personalityPlaceholder':
+      'e.g., Professional and warm, helping candidates feel at ease...',
+    'agents.form.instructions': 'System Instructions (School Context)',
+    'agents.form.instructionsPlaceholder':
+      'Describe the school, the role, and specific questions the agent should ask...',
 
     // Call History
     'calls.title': 'Call History',
@@ -236,7 +247,8 @@ export const translations = {
     'common.submit': 'إرسال',
     'common.loading': 'جاري التحميل...',
     'common.success': 'نجاح',
-    'common.error': 'خطر',
+    'common.error': 'خطأ',
+    'common.actions': 'الإجراءات',
 
     // Jobs List
     'jobs.title': 'إعلانات الوظائف',
@@ -334,7 +346,17 @@ export const translations = {
     'agents.modal.desc': 'تعديل إعدادات هذا الوكيل الذكي.',
     'agents.avgDuration': 'متوسط المدة',
     'agents.successRate': 'معدل النجاح',
-    'agents.total': 'إجمالي العمليات',
+    'agents.total': 'إجمالي المكالمات',
+    'agents.form.name': 'اسم الوكيل',
+    'agents.form.type': 'غرض الوكيل',
+    'agents.form.language': 'اللغة الأساسية',
+    'agents.form.voice': 'اختيار الصوت',
+    'agents.form.personality': 'شخصية/لهجة الوكيل',
+    'agents.form.personalityPlaceholder':
+      'مثلاً: مهني ودافئ، مما يسعد المرشحين...',
+    'agents.form.instructions': 'تعليمات النظام (سياق المدرسة)',
+    'agents.form.instructionsPlaceholder':
+      'صف المدرسة، الدور، والأسئلة المحددة التي يجب أن يطرحها الوكيل...',
 
     // Call History
     'calls.title': 'سجل المكالمات',

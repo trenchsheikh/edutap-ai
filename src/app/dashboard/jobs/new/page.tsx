@@ -50,11 +50,12 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { FileUploader } from '@/components/file-uploader';
+import { Agent } from '@/lib/mock-data';
 
 export default function CreateJobPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const { candidates, addJob, addCandidate, assignCandidatesToJob } =
+  const { candidates, agents, addJob, addCandidate, assignCandidatesToJob } =
     useAppStore();
 
   // Job Form State
@@ -69,27 +70,6 @@ export default function CreateJobPage() {
     agentId: '',
     jdFile: null as File | null
   });
-
-  const availableAgents = [
-    {
-      id: 'ag-1',
-      name: 'Sarah (Primary Recruiter)',
-      language: 'English',
-      voice: 'Warm/Professional'
-    },
-    {
-      id: 'ag-2',
-      name: 'Omar (Bilingual Assistant)',
-      language: 'Arabic/English',
-      voice: 'Friendly/Direct'
-    },
-    {
-      id: 'ag-3',
-      name: 'Nora (Senior Consultant)',
-      language: 'English',
-      voice: 'Authoritative'
-    }
-  ];
 
   // Candidate Selection State
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>(
@@ -344,7 +324,7 @@ export default function CreateJobPage() {
                       <SelectValue placeholder='Click to select an agent...' />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableAgents.map((agent) => (
+                      {agents.map((agent: Agent) => (
                         <SelectItem
                           key={agent.id}
                           value={agent.id}
@@ -359,7 +339,7 @@ export default function CreateJobPage() {
                                 <IconLanguage size={12} /> {agent.language}
                               </span>
                               <span className='flex items-center gap-1'>
-                                <IconMicrophone size={12} /> {agent.voice}
+                                <IconMicrophone size={12} /> {agent.voiceId}
                               </span>
                             </div>
                           </div>
