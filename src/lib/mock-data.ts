@@ -40,6 +40,18 @@ export interface Job {
   description: string;
 }
 
+export interface Agent {
+  id: string;
+  name: string;
+  type: 'Screening' | 'Scheduling' | 'Support';
+  language: 'English' | 'Arabic' | 'Bilingual';
+  voiceId: string;
+  status: 'Active' | 'Idle';
+  lastActive: string;
+  personality: string;
+  instructions: string;
+}
+
 const ROLES = [
   'Mathematics Teacher',
   'Science Teacher',
@@ -198,6 +210,45 @@ Requirements:
 - Significant teaching and leadership experience in a Primary setting.
 - Proven track record of improving teaching and learning standards.
 - Excellent communication and interpersonal skills.`
+  }
+];
+
+export const initialAgents: Agent[] = [
+  {
+    id: '1',
+    name: 'Sarah (Screening)',
+    type: 'Screening',
+    language: 'English',
+    voiceId: 'en-US-Neural2-F',
+    status: 'Active',
+    lastActive: '2 mins ago',
+    personality: 'Professional, warm, and efficient.',
+    instructions:
+      'You are a school recruiter screening candidates for teaching positions. Be polite and ask about their curriculum experience and availability.'
+  },
+  {
+    id: '2',
+    name: 'Omar (Bilingual)',
+    type: 'Screening',
+    language: 'Bilingual',
+    voiceId: 'ar-XA-Wavenet-B',
+    status: 'Active',
+    lastActive: 'Now',
+    personality: 'Formal, respectful, and clear.',
+    instructions:
+      'You are a recruitment assistant for a school in Qatar. You speak both English and Arabic fluently. Screen candidates for their cultural fit and language proficiency.'
+  },
+  {
+    id: '3',
+    name: 'Nora (Scheduling)',
+    type: 'Scheduling',
+    language: 'English',
+    voiceId: 'en-GB-Wavenet-A',
+    status: 'Idle',
+    lastActive: '5 hours ago',
+    personality: 'Friendly, organized, and helpful.',
+    instructions:
+      'You help candidates schedule their first-round interviews. Be helpful in finding a time that works for both the school and the candidate.'
   }
 ];
 

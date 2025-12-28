@@ -1,13 +1,24 @@
 import { create } from 'zustand';
-import { Candidate, Job, initialJobs, initialCandidates } from './mock-data';
+import {
+  Candidate,
+  Job,
+  Agent,
+  initialJobs,
+  initialCandidates,
+  initialAgents
+} from './mock-data';
 
 interface AppState {
   jobs: Job[];
   candidates: Candidate[];
+  agents: Agent[];
   language: 'en' | 'ar';
   setLanguage: (lang: 'en' | 'ar') => void;
   addJob: (job: Job) => void;
   addCandidate: (candidate: Candidate) => void;
+  addAgent: (agent: Agent) => void;
+  updateAgent: (agentId: string, updates: Partial<Agent>) => void;
+  deleteAgent: (agentId: string) => void;
   assignCandidatesToJob: (jobId: string, candidateIds: string[]) => void;
   getJob: (id: string) => Job | undefined;
   scoreCandidates: (jobId: string) => void;
@@ -21,11 +32,23 @@ interface AppState {
 export const useAppStore = create<AppState>((set, get) => ({
   jobs: initialJobs,
   candidates: initialCandidates,
+  agents: initialAgents,
   language: 'en',
   setLanguage: (lang) => set({ language: lang }),
   addJob: (job) => set((state) => ({ jobs: [job, ...state.jobs] })),
   addCandidate: (candidate) =>
     set((state) => ({ candidates: [candidate, ...state.candidates] })),
+  addAgent: (agent) => set((state) => ({ agents: [agent, ...state.agents] })),
+  updateAgent: (agentId, updates) =>
+    set((state) => ({
+      agents: state.agents.map((a) =>
+        a.id === agentId ? { ...a, ...updates } : a
+      )
+    })),
+  deleteAgent: (agentId) =>
+    set((state) => ({
+      agents: state.agents.filter((a) => a.id !== agentId)
+    })),
   assignCandidatesToJob: (jobId, candidateIds) =>
     set((state) => ({
       jobs: state.jobs.map((job) =>
