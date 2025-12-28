@@ -40,7 +40,12 @@ import {
   IconBriefcase,
   IconFileDescription,
   IconUsers,
-  IconSearch
+  IconSearch,
+  IconUpload,
+  IconMicrophone,
+  IconLanguage,
+  IconFileTypePdf,
+  IconWand
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
@@ -60,8 +65,31 @@ export default function CreateJobPage() {
     location: '',
     status: 'Active',
     description: '',
-    type: 'Full-time'
+    type: 'Full-time',
+    agentId: '',
+    jdFile: null as File | null
   });
+
+  const availableAgents = [
+    {
+      id: 'ag-1',
+      name: 'Sarah (Primary Recruiter)',
+      language: 'English',
+      voice: 'Warm/Professional'
+    },
+    {
+      id: 'ag-2',
+      name: 'Omar (Bilingual Assistant)',
+      language: 'Arabic/English',
+      voice: 'Friendly/Direct'
+    },
+    {
+      id: 'ag-3',
+      name: 'Nora (Senior Consultant)',
+      language: 'English',
+      voice: 'Authoritative'
+    }
+  ];
 
   // Candidate Selection State
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>(
@@ -230,38 +258,132 @@ export default function CreateJobPage() {
             )}
 
             {step === 2 && (
-              <div className='grid gap-4'>
-                <div className='space-y-2'>
-                  <Label>Role Overview</Label>
-                  <Textarea
-                    placeholder='Brief summary of the role...'
-                    rows={3}
-                    value={jobData.description}
-                    onChange={(e) =>
-                      setJobData({ ...jobData, description: e.target.value })
-                    }
-                  />
+              <div className='grid gap-6'>
+                <div className='space-y-4'>
+                  <Label className='text-base font-bold'>
+                    Option 1: Upload Job Description
+                  </Label>
+                  <p className='text-muted-foreground text-xs'>
+                    Upload a PDF or Word document of the job description for the
+                    AI to analyze.
+                  </p>
+                  <div className='bg-muted/10 hover:border-primary/50 rounded-xl border-2 border-dashed p-6 transition-colors'>
+                    <FileUploader
+                      maxFiles={1}
+                      value={jobData.jdFile ? [jobData.jdFile] : []}
+                      onValueChange={(val) => {
+                        const files =
+                          typeof val === 'function'
+                            ? val(jobData.jdFile ? [jobData.jdFile] : [])
+                            : val;
+                        setJobData({ ...jobData, jdFile: files[0] || null });
+                      }}
+                      accept={{
+                        'application/pdf': ['.pdf'],
+                        'application/msword': ['.doc'],
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                          ['.docx']
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className='space-y-2'>
-                  <Label>Responsibilities</Label>
-                  <Textarea
-                    placeholder='List key responsibilities...'
-                    rows={5}
-                  />
+
+                <div className='relative py-4'>
+                  <div className='absolute inset-0 flex items-center'>
+                    <Separator />
+                  </div>
+                  <div className='relative flex justify-center text-xs uppercase'>
+                    <span className='bg-background text-muted-foreground px-2 font-bold'>
+                      Or Provide Manually
+                    </span>
+                  </div>
+                </div>
+
+                <div className='space-y-4'>
+                  <div className='space-y-2'>
+                    <Label>Role Overview</Label>
+                    <Textarea
+                      placeholder='Brief summary of the role...'
+                      rows={3}
+                      value={jobData.description}
+                      onChange={(e) =>
+                        setJobData({ ...jobData, description: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label>Responsibilities & Requirements</Label>
+                    <Textarea
+                      placeholder='List key responsibilities, qualifications, and experience required...'
+                      rows={6}
+                    />
+                  </div>
                 </div>
               </div>
             )}
 
             {step === 3 && (
-              <div className='grid gap-4'>
-                <div className='space-y-2'>
-                  <Label>Train Our AI Agent: What should it know?</Label>
+              <div className='grid gap-8'>
+                <div className='space-y-4'>
+                  <Label className='flex items-center gap-2 text-base font-bold'>
+                    <IconRobot className='text-primary' size={20} />
+                    Assign an AI Agent to this call
+                  </Label>
+                  <p className='text-muted-foreground text-xs'>
+                    Select the voice personality that will represent your school
+                    during the screening.
+                  </p>
+
+                  <Select
+                    onValueChange={(v) =>
+                      setJobData({ ...jobData, agentId: v })
+                    }
+                    defaultValue={jobData.agentId}
+                  >
+                    <SelectTrigger className='hover:border-primary/50 h-16 rounded-xl border-2 transition-all'>
+                      <SelectValue placeholder='Click to select an agent...' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableAgents.map((agent) => (
+                        <SelectItem
+                          key={agent.id}
+                          value={agent.id}
+                          className='py-3'
+                        >
+                          <div className='flex flex-col gap-0.5'>
+                            <span className='text-sm font-bold'>
+                              {agent.name}
+                            </span>
+                            <div className='text-muted-foreground flex items-center gap-3 text-[10px] tracking-widest uppercase'>
+                              <span className='flex items-center gap-1'>
+                                <IconLanguage size={12} /> {agent.language}
+                              </span>
+                              <span className='flex items-center gap-1'>
+                                <IconMicrophone size={12} /> {agent.voice}
+                              </span>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className='space-y-4'>
+                  <Label className='flex items-center gap-2 text-base font-bold'>
+                    <IconWand className='text-primary' size={20} />
+                    Additional AI Training Context
+                  </Label>
+                  <p className='text-muted-foreground text-xs italic'>
+                    Extra tips for the agent about the school culture or
+                    specific project nuances.
+                  </p>
                   <Textarea
-                    placeholder='The school culture is very collaborative...'
+                    placeholder='e.g. Mention that we provide premium on-site housing for international staff...'
                     rows={4}
+                    className='rounded-xl'
                   />
                 </div>
-                {/* ... other AI fields ... */}
               </div>
             )}
 

@@ -19,6 +19,12 @@ export interface Candidate {
   avatar: string; // url or placeholder
   cvFile?: string;
   matchScore?: number; // 0-100
+  callDetails?: {
+    transcript: { speaker: string; text: string }[];
+    responses: Record<string, string>;
+    generatedLeads: string[];
+  };
+  matchAnalysis?: string[]; // Why they got this score
 }
 
 export interface Job {
@@ -56,9 +62,11 @@ const STATUSES: Candidate['status'][] = [
   'Rejected'
 ];
 
-export const initialCandidates: Candidate[] = Array.from(
-  { length: 50 },
-  () => ({
+export const initialCandidates: Candidate[] = Array.from({ length: 50 }, () => {
+  const status = faker.helpers.arrayElement(STATUSES);
+  const hasCallDetails = status === 'Answered';
+
+  return {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
     role: faker.helpers.arrayElement(ROLES),
@@ -66,12 +74,57 @@ export const initialCandidates: Candidate[] = Array.from(
     phone: faker.phone.number(),
     exp: `${faker.number.int({ min: 1, max: 20 })} Yrs`,
     salary: `${faker.number.int({ min: 8, max: 25 })},000 QAR`,
-    status: faker.helpers.arrayElement(STATUSES),
+    status: status,
     avatar: faker.image.avatar(),
-    cvFile: 'resume.pdf'
+    cvFile: 'resume.pdf',
+    callDetails: hasCallDetails
+      ? {
+          transcript: [
+            {
+              speaker: 'AI Agent',
+              text:
+                'Hello, am I speaking with ' + faker.person.firstName() + '?'
+            },
+            {
+              speaker: 'Candidate',
+              text: 'Yes, this is they. How can I help you?'
+            },
+            {
+              speaker: 'AI Agent',
+              text:
+                'I am calling regarding your application for the ' +
+                faker.helpers.arrayElement(ROLES) +
+                ' position. Are you still interested?'
+            },
+            {
+              speaker: 'Candidate',
+              text: 'Absolutely! I have been following your school for a while.'
+            },
+            {
+              speaker: 'AI Agent',
+              text: 'Great. Can you tell me about your experience with the British Curriculum?'
+            },
+            {
+              speaker: 'Candidate',
+              text: 'I have over 5 years of experience teaching IGCSE and A-Levels in Doha.'
+            }
+          ],
+          responses: {
+            'Interest Level': 'High',
+            'Curriculum Experience': 'British (IGCSE, A-Level)',
+            Availability: 'Immediate',
+            'Salary Expectation': 'Negotiable'
+          },
+          generatedLeads: [
+            'Strong background in British Curriculum',
+            'Local experience in Qatar',
+            'Eager to start immediately'
+          ]
+        }
+      : undefined
     // matchScore intentionally undefined initially
-  })
-);
+  };
+});
 
 export const initialJobs: Job[] = [
   {

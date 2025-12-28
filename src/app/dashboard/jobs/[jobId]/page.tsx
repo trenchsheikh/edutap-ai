@@ -47,8 +47,12 @@ import {
   IconCalendarEvent,
   IconX,
   IconPlus,
-  IconSearch
+  IconSearch,
+  IconCheck,
+  IconAlertTriangle,
+  IconInfoCircle
 } from '@tabler/icons-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -70,6 +74,7 @@ export default function JobDetailPage({
     candidates,
     scoreCandidates,
     updateCandidateStatus,
+    simulateCall,
     addCandidate,
     assignCandidatesToJob,
     language
@@ -97,6 +102,35 @@ export default function JobDetailPage({
     key: string;
     direction: 'asc' | 'desc';
   }>({ key: 'matchScore', direction: 'desc' });
+
+  // Pipeline Selection State
+  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
+
+  const handleToggleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedCandidates(jobCandidates.map((c) => c.id));
+    } else {
+      setSelectedCandidates([]);
+    }
+  };
+
+  const handleToggleSelect = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCandidates((prev) => [...prev, id]);
+    } else {
+      setSelectedCandidates((prev) => prev.filter((item) => item !== id));
+    }
+  };
+
+  // Score Analysis State
+  const [analysisOpen, setAnalysisOpen] = useState(false);
+  const [selectedCandidateForAnalysis, setSelectedCandidateForAnalysis] =
+    useState<any>(null);
+
+  const openAnalysis = (candidate: any) => {
+    setSelectedCandidateForAnalysis(candidate);
+    setAnalysisOpen(true);
+  };
 
   // Unassigned filter
   const unassignedCandidates = useMemo(() => {
@@ -200,11 +234,17 @@ export default function JobDetailPage({
 
   const handleCallAll = () => {
     setIsCalling(true);
+    // Simulate each call with a staggered start
+    job.candidates.forEach((cid, index) => {
+      setTimeout(() => {
+        simulateCall(jobId, cid);
+      }, index * 400); // 400ms stagger between starting calls
+    });
+
     setTimeout(() => {
-      updateCandidateStatus(job.candidates, 'Scheduled');
       setIsCalling(false);
       toast.success('Calls Initiated', {
-        description: 'AI Agent is becoming active for all candidates.'
+        description: 'AI Agent is now dialing all candidates in the pipeline.'
       });
     }, 1000);
   };
@@ -310,7 +350,83 @@ export default function JobDetailPage({
                 <CardTitle>{t['job.pipeline']}</CardTitle>
                 <CardDescription>{t['job.pipelineDesc']}</CardDescription>
               </div>
-              <div className='flex flex-wrap gap-2'>
+              <div className='flex flex-wrap items-center gap-2'>
+                {selectedCandidates.length > 0 && (
+                  <div className='mr-2 flex items-center gap-2 border-r pr-2'>
+                    <span className='text-muted-foreground text-sm font-medium'>
+                      {selectedCandidates.length} Selected
+                    </span>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          size='sm'
+                          className='bg-emerald-600 text-white hover:bg-emerald-700'
+                        >
+                          <IconPhoneCalling className='mr-2 h-4 w-4' />
+                          Schedule Selected
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>
+                            Schedule Selected Candidates
+                          </DialogTitle>
+                          <DialogDescription>
+                            Start a call campaign for the{' '}
+                            {selectedCandidates.length} selected candidates.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className='grid gap-4 py-4'>
+                          <div className='grid grid-cols-2 gap-4'>
+                            <div className='space-y-2'>
+                              <Label>{t['calls.date']}</Label>
+                              <Input
+                                type='date'
+                                defaultValue={
+                                  new Date().toISOString().split('T')[0]
+                                }
+                              />
+                            </div>
+                            <div className='space-y-2'>
+                              <Label>Time</Label>
+                              <Input type='time' defaultValue='09:00' />
+                            </div>
+                          </div>
+                          <div className='space-y-2'>
+                            <Label>{t['dialog.agentContext']}</Label>
+                            <Textarea
+                              placeholder={t['dialog.agentContextPlaceholder']}
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            variant='outline'
+                            onClick={() => setSelectedCandidates([])}
+                          >
+                            {t['common.cancel']}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              selectedCandidates.forEach((cid, index) => {
+                                setTimeout(() => {
+                                  simulateCall(jobId, cid);
+                                }, index * 400);
+                              });
+                              setSelectedCandidates([]);
+                              toast.success('Calls Scheduled', {
+                                description: `AI Agent is now calling the ${selectedCandidates.length} selected candidates.`
+                              });
+                            }}
+                            className='bg-emerald-600 hover:bg-emerald-700'
+                          >
+                            Schedule Now
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                )}
                 {/* Score CVs Button */}
                 <Button
                   size='sm'
@@ -600,6 +716,15 @@ export default function JobDetailPage({
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className='w-[40px]'>
+                      <Checkbox
+                        checked={
+                          jobCandidates.length > 0 &&
+                          selectedCandidates.length === jobCandidates.length
+                        }
+                        onCheckedChange={handleToggleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead
                       className='hover:bg-muted/50 cursor-pointer'
                       onClick={() => handleSort('name')}
@@ -639,7 +764,7 @@ export default function JobDetailPage({
                   {jobCandidates.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={6}
                         className='text-muted-foreground py-8 text-center'
                       >
                         {t['job.noCandidates']}
@@ -648,23 +773,37 @@ export default function JobDetailPage({
                   ) : (
                     jobCandidates.map((c) => (
                       <TableRow key={c.id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedCandidates.includes(c.id)}
+                            onCheckedChange={(checked) =>
+                              handleToggleSelect(c.id, checked as boolean)
+                            }
+                          />
+                        </TableCell>
                         <TableCell className='font-medium'>{c.name}</TableCell>
                         <TableCell>{c.role}</TableCell>
                         <TableCell>
                           {c.matchScore ? (
-                            <Badge
-                              className={
-                                c.matchScore >= 85
-                                  ? 'bg-green-500 hover:bg-green-600'
-                                  : c.matchScore >= 70
-                                    ? 'bg-lime-500 hover:bg-lime-600'
-                                    : c.matchScore >= 50
-                                      ? 'bg-orange-500 hover:bg-orange-600'
-                                      : 'bg-red-500 hover:bg-red-600'
-                              }
+                            <Button
+                              variant='ghost'
+                              className='h-auto p-0 hover:bg-transparent'
+                              onClick={() => openAnalysis(c)}
                             >
-                              {c.matchScore}% Match
-                            </Badge>
+                              <Badge
+                                className={`cursor-pointer transition-all hover:scale-105 ${
+                                  c.matchScore >= 85
+                                    ? 'bg-green-500 hover:bg-green-600'
+                                    : c.matchScore >= 70
+                                      ? 'bg-lime-500 hover:bg-lime-600'
+                                      : c.matchScore >= 50
+                                        ? 'bg-orange-500 hover:bg-orange-600'
+                                        : 'bg-red-500 hover:bg-red-600'
+                                }`}
+                              >
+                                {c.matchScore}% Match
+                              </Badge>
+                            </Button>
                           ) : (
                             <span className='text-muted-foreground text-sm'>
                               -
@@ -686,17 +825,59 @@ export default function JobDetailPage({
                             {c.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className='flex gap-2'>
-                          <Button
-                            size='icon'
-                            variant='ghost'
-                            title='View Profile'
-                          >
-                            <IconFileText size={16} />
-                          </Button>
-                          <Button size='icon' variant='ghost' title='Call Logs'>
-                            <IconPhone size={16} />
-                          </Button>
+                        <TableCell className='flex items-center gap-2'>
+                          {c.status === 'Answered' ? (
+                            <Button
+                              size='sm'
+                              variant='secondary'
+                              className='hover:bg-primary/10 hover:text-primary h-8 gap-1.5 rounded-lg px-3 transition-all'
+                              onClick={() =>
+                                router.push(
+                                  `/dashboard/jobs/${jobId}/candidates/${c.id}`
+                                )
+                              }
+                            >
+                              <IconPhone size={14} />
+                              <span className='text-xs font-bold'>
+                                Review Call
+                              </span>
+                            </Button>
+                          ) : (
+                            <Button
+                              size='icon'
+                              variant='ghost'
+                              title='View Details'
+                              className='h-8 w-8'
+                              onClick={() =>
+                                router.push(
+                                  `/dashboard/jobs/${jobId}/candidates/${c.id}`
+                                )
+                              }
+                            >
+                              <IconFileText size={16} />
+                            </Button>
+                          )}
+
+                          {c.status !== 'Answered' &&
+                            c.status !== 'Scheduled' && (
+                              <Button
+                                size='sm'
+                                variant='outline'
+                                className='h-8 gap-1.5 rounded-lg border-emerald-200 bg-emerald-50/50 px-3 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800'
+                                onClick={() => {
+                                  simulateCall(jobId, c.id);
+                                  toast.info(`Calling ${c.name}...`, {
+                                    description:
+                                      'AI Agent is establishing connection.'
+                                  });
+                                }}
+                              >
+                                <IconPhoneCalling size={14} />
+                                <span className='text-xs font-bold'>
+                                  Call Now
+                                </span>
+                              </Button>
+                            )}
                         </TableCell>
                       </TableRow>
                     ))
@@ -706,6 +887,113 @@ export default function JobDetailPage({
             </div>
           </CardContent>
         </Card>
+
+        {/* Score Analysis Dialog */}
+        <Dialog open={analysisOpen} onOpenChange={setAnalysisOpen}>
+          <DialogContent className='max-w-md overflow-hidden p-0'>
+            <AnimatePresence mode='wait'>
+              {selectedCandidateForAnalysis && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className='flex flex-col'
+                >
+                  <div
+                    className={`p-6 text-white ${
+                      selectedCandidateForAnalysis.matchScore >= 85
+                        ? 'bg-green-500'
+                        : selectedCandidateForAnalysis.matchScore >= 70
+                          ? 'bg-lime-500'
+                          : selectedCandidateForAnalysis.matchScore >= 50
+                            ? 'bg-orange-500'
+                            : 'bg-red-500'
+                    }`}
+                  >
+                    <div className='flex items-center justify-between'>
+                      <div className='flex items-center gap-3'>
+                        <div className='rounded-full bg-white/20 p-2'>
+                          <IconWand size={24} />
+                        </div>
+                        <div>
+                          <h3 className='text-lg font-bold'>Match Analysis</h3>
+                          <p className='text-sm text-white/80'>
+                            {selectedCandidateForAnalysis.name}
+                          </p>
+                        </div>
+                      </div>
+                      <div className='text-right'>
+                        <span className='text-3xl font-black'>
+                          {selectedCandidateForAnalysis.matchScore}%
+                        </span>
+                        <p className='text-[10px] font-bold tracking-widest uppercase'>
+                          Confidence
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='p-6 pb-8'>
+                    <div className='mb-4 flex items-center gap-2'>
+                      <IconInfoCircle size={18} className='text-primary' />
+                      <h4 className='text-sm font-bold tracking-wider uppercase'>
+                        Why this score?
+                      </h4>
+                    </div>
+
+                    <div className='space-y-3'>
+                      {(
+                        selectedCandidateForAnalysis.matchAnalysis || [
+                          'Profile analyzed against job requirements.'
+                        ]
+                      ).map((reason: string, i: number) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          className='bg-muted/30 hover:bg-muted/50 flex items-start gap-3 rounded-lg border p-3 transition-colors'
+                        >
+                          <div
+                            className={`mt-0.5 rounded-full p-1 ${
+                              selectedCandidateForAnalysis.matchScore >= 70
+                                ? 'bg-green-100 text-green-600'
+                                : 'bg-orange-100 text-orange-600'
+                            }`}
+                          >
+                            {selectedCandidateForAnalysis.matchScore >= 70 ? (
+                              <IconCheck size={12} strokeWidth={4} />
+                            ) : (
+                              <IconAlertTriangle size={12} strokeWidth={4} />
+                            )}
+                          </div>
+                          <span className='text-sm leading-tight font-medium'>
+                            {reason}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    <div className='bg-primary/5 border-primary/10 mt-6 rounded-xl border p-4'>
+                      <p className='text-muted-foreground text-xs leading-relaxed italic'>
+                        "Our AI analyzed the candidate's CV against {job.title}
+                        's core requirements, experience thresholds, and skill
+                        alignment."
+                      </p>
+                    </div>
+
+                    <Button
+                      className='bg-primary mt-6 w-full'
+                      onClick={() => setAnalysisOpen(false)}
+                    >
+                      Got it
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </DialogContent>
+        </Dialog>
       </div>
     </PageContainer>
   );

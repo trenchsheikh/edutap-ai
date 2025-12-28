@@ -15,6 +15,7 @@ interface AppState {
     candidateIds: string[],
     status: Candidate['status']
   ) => void;
+  simulateCall: (jobId: string, candidateId: string) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -85,8 +86,44 @@ export const useAppStore = create<AppState>((set, get) => ({
           // Real CVs have content we don't see in the mock object, so we simulate that variance
           score += Math.floor(Math.random() * 15);
 
+          // Generate Analysis
+          const analysis: string[] = [];
+          if (jobTitleLower === roleLower) {
+            analysis.push('Perfect role title match');
+          } else if (
+            jobTitleLower.includes(roleLower) ||
+            roleLower.includes(jobTitleLower)
+          ) {
+            analysis.push('Highly relevant professional background');
+          }
+          if (keywordMatches > 2) {
+            analysis.push(
+              `Strong keyword alignment with ${keywordMatches} key skills identified`
+            );
+          }
+          if (expYears >= 5) {
+            analysis.push(
+              `${expYears} years of experience exceeds minimum requirements`
+            );
+          } else if (expYears > 0) {
+            analysis.push(`Meets experience threshold with ${expYears} years`);
+          }
+          if (score > 85) {
+            analysis.push('Excellent overall profile fit for this institution');
+          }
+
           // Clamp score to 0-100
-          return { ...c, matchScore: Math.max(15, Math.min(98, score)) };
+          return {
+            ...c,
+            matchScore: Math.max(15, Math.min(98, score)),
+            matchAnalysis:
+              analysis.length > 0
+                ? analysis
+                : [
+                    'Core requirements partially met',
+                    'Relevant background for the position'
+                  ]
+          };
         }
         return c;
       });
@@ -98,5 +135,72 @@ export const useAppStore = create<AppState>((set, get) => ({
       candidates: state.candidates.map((c) =>
         candidateIds.includes(c.id) ? { ...c, status } : c
       )
-    }))
+    })),
+  simulateCall: (jobId, candidateId) => {
+    const { candidates, updateCandidateStatus } = get();
+    const candidate = candidates.find((c) => c.id === candidateId);
+    // Note: getJob is also available if needed
+    if (!candidate) return;
+
+    // Start Call
+    updateCandidateStatus([candidateId], 'Scheduled');
+
+    // Simulate AI Processing and completion
+    setTimeout(() => {
+      set((state) => {
+        const job = state.jobs.find((j) => j.id === jobId);
+        return {
+          candidates: state.candidates.map((c) => {
+            if (c.id === candidateId) {
+              return {
+                ...c,
+                status: 'Answered',
+                callDetails: {
+                  transcript: [
+                    {
+                      speaker: 'AI Agent',
+                      text: `Hello, am I speaking with ${c.name}?`
+                    },
+                    {
+                      speaker: 'Candidate',
+                      text: 'Yes, this is they. How can I help you?'
+                    },
+                    {
+                      speaker: 'AI Agent',
+                      text: `I am calling regarding your application for the ${job?.title || 'position'}. Are you still interested?`
+                    },
+                    {
+                      speaker: 'Candidate',
+                      text: 'Absolutely! I am very excited about this opportunity.'
+                    },
+                    {
+                      speaker: 'AI Agent',
+                      text: 'Great. Can you tell me more about your recent experience?'
+                    },
+                    {
+                      speaker: 'Candidate',
+                      text: `I have been working as a ${c.role} for the past several years, focusing on student engagement and curriculum development.`
+                    }
+                  ],
+                  responses: {
+                    'Interest Level': 'Very High',
+                    Availability: 'Immediate',
+                    'Salary Expectation': c.salary,
+                    'Core Competency': 'Curriculum Design'
+                  },
+                  generatedLeads: [
+                    'Highly enthusiastic about the role',
+                    'Excellent communication skills identified',
+                    'Strong alignment with school values'
+                  ]
+                }
+              };
+            }
+            return c;
+          })
+        };
+      });
+      // Show a toast here would be nice but store shouldn't usually handle UI logic directly
+    }, 4000);
+  }
 }));
